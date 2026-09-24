@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -17,17 +19,46 @@ type Tab = "plan" | "saved";
 type SortOption = "duration" | "calories" | "rating";
 
 export default function MyPlan() {
-  const [activeTab, setActiveTab] = useState<Tab>("plan");
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen flex-col bg-[#0C0D10] text-white">
+          <Navbar />
+
+          <section className="flex flex-1 items-center justify-center px-6">
+            <p className="text-[13px] text-[#9CA3AF]">
+              Loading workouts…
+            </p>
+          </section>
+
+          <Footer />
+        </main>
+      }
+    >
+      <MyPlanContent />
+    </Suspense>
+  );
+}
+
+function MyPlanContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [plan, setPlan] = useState<Workout[]>([]);
   const [saved, setSaved] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("duration");
   const [toast, setToast] = useState("");
+
+  const activeTab: Tab =
+    searchParams.get("tab") === "saved" ? "saved" : "plan";
 
   useEffect(() => {
     const loadStorage = () => {
       setPlan(getPlan());
       setSaved(getSaved());
+      setLoading(false);
     };
 
     loadStorage();
@@ -50,8 +81,14 @@ export default function MyPlan() {
       setToast("");
     }, 2500);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [toast]);
+
+  const handleTabChange = (tab: Tab) => {
+    router.push(`/my-plan?tab=${tab}`);
+  };
 
   const currentList = activeTab === "plan" ? plan : saved;
 
@@ -71,19 +108,19 @@ export default function MyPlan() {
 
   const totalMinutes = plan.reduce(
     (total, workout) => total + workout.duration,
-    0
+    0,
   );
 
   const totalCalories = plan.reduce(
     (total, workout) => total + workout.caloriesBurned,
-    0
+    0,
   );
 
   const handleDone = (id: number) => {
     setCompleted((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
-        : [...current, id]
+        : [...current, id],
     );
 
     setToast("Workout marked as done.");
@@ -94,57 +131,57 @@ export default function MyPlan() {
       removeFromPlan(id);
       setPlan(getPlan());
       setToast("Workout removed from today’s plan.");
-    } else {
-      removeFromSaved(id);
-      setSaved(getSaved());
-      setToast("Workout removed from saved.");
+      return;
     }
+
+    removeFromSaved(id);
+    setSaved(getSaved());
+    setToast("Workout removed from saved.");
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#0C0D10] text-white">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-[#0C0D10] text-white">
       <Navbar />
 
-      <section className="mx-auto max-w-[1232px] px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14">
-        <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div>
-            <p className="text-[10px] font-bold tracking-[1.1px] text-[#C2F800] sm:text-[11px]">
-              YOUR WORKOUTS
-            </p>
+      <section className="mx-auto w-full max-w-[1232px] flex-1 px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12">
+        <div>
+          <p className="text-[10px] font-bold tracking-[1.1px] text-[#C2F800] sm:text-[11px]">
+            YOUR WORKOUTS
+          </p>
 
-            <h1 className="mt-2 font-['Oswald'] text-[36px] font-bold leading-none tracking-[-0.8px] sm:text-[44px]">
-              MY PLAN
-            </h1>
+          <h1 className="mt-2 font-['Oswald'] text-[36px] font-bold leading-none tracking-[-0.8px] sm:text-[44px]">
+            MY PLAN
+          </h1>
 
-            <p className="mt-3 max-w-[560px] text-[13px] leading-5 text-[#9CA3AF] sm:text-[14px]">
-              Keep today&apos;s work focused, then save anything you want to
-              revisit later.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:min-w-[430px]">
-            <Metric
-              label="Exercises"
-              value={String(plan.length)}
-            />
-
-            <Metric
-              label="Minutes"
-              value={String(totalMinutes)}
-            />
-
-            <Metric
-              label="Calories"
-              value={String(totalCalories)}
-            />
-          </div>
+          <p className="mt-3 max-w-[560px] text-[13px] leading-5 text-[#9CA3AF] sm:text-[14px]">
+            Keep today&apos;s work focused, then save anything you want to
+            revisit later.
+          </p>
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 border-b border-[#222630] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 grid grid-cols-3 divide-x divide-[#252A33] overflow-hidden rounded-lg border border-[#252A33] bg-[#14171E]">
+          <Metric
+            label="Exercises"
+            value={String(plan.length)}
+            highlight
+          />
+
+          <Metric
+            label="Minutes"
+            value={String(totalMinutes)}
+          />
+
+          <Metric
+            label="Calories"
+            value={String(totalCalories)}
+          />
+        </div>
+
+        <div className="mt-9 flex flex-col gap-4 border-b border-[#222630] sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-6">
             <button
               type="button"
-              onClick={() => setActiveTab("plan")}
+              onClick={() => handleTabChange("plan")}
               className={`border-b-2 pb-3 text-[12px] font-bold transition ${
                 activeTab === "plan"
                   ? "border-[#C2F800] text-white"
@@ -156,7 +193,7 @@ export default function MyPlan() {
 
             <button
               type="button"
-              onClick={() => setActiveTab("saved")}
+              onClick={() => handleTabChange("saved")}
               className={`border-b-2 pb-3 text-[12px] font-bold transition ${
                 activeTab === "saved"
                   ? "border-[#C2F800] text-white"
@@ -172,7 +209,7 @@ export default function MyPlan() {
               htmlFor="sort"
               className="text-[11px] text-[#6B7280]"
             >
-              Sort
+              Sort By
             </label>
 
             <select
@@ -190,7 +227,13 @@ export default function MyPlan() {
           </div>
         </div>
 
-        {sortedWorkouts.length === 0 ? (
+        {loading ? (
+          <div className="mt-8 rounded-2xl border border-[#222630] bg-[#15171D] px-6 py-16 text-center">
+            <p className="text-[13px] text-[#9CA3AF]">
+              Loading workouts…
+            </p>
+          </div>
+        ) : sortedWorkouts.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#222630] bg-[#15171D] px-6 py-16 text-center">
             <h2 className="font-['Oswald'] text-[26px] font-bold">
               {activeTab === "plan"
@@ -212,87 +255,70 @@ export default function MyPlan() {
             </Link>
           </div>
         ) : (
-          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="mt-8 space-y-4">
             {sortedWorkouts.map((workout) => {
               const isDone = completed.includes(workout.id);
 
               return (
                 <article
                   key={workout.id}
-                  className={`overflow-hidden rounded-2xl border border-[#222630] bg-[#15171D] transition ${
+                  className={`rounded-2xl border border-[#232732] bg-[#14171E] p-5 transition hover:border-[#2D313B] ${
                     isDone ? "opacity-60" : ""
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row">
-                    <div className="h-[190px] shrink-0 sm:h-auto sm:w-[220px]">
-                      <img
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+                    <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-xl sm:h-32 lg:h-[88px] lg:w-[144px]">
+                      <Image
                         src={workout.image}
                         alt={workout.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="(max-width: 1023px) 100vw, 144px"
+                        className="object-cover"
                       />
                     </div>
 
-                    <div className="flex min-w-0 flex-1 flex-col p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <h2 className="font-['Oswald'] text-[18px] font-bold leading-6 tracking-[0.35px]">
-                            {workout.name.toUpperCase()}
-                          </h2>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-['Oswald'] text-[19px] font-bold leading-6 tracking-[0.35px]">
+                        {workout.name.toUpperCase()}
+                      </h2>
 
-                          <p className="mt-1 text-[12px] text-[#9CA3AF]">
-                            {workout.equipment}
-                          </p>
-                        </div>
+                      <p className="mt-1.5 text-[12px] text-[#9CA3AF]">
+                        {workout.equipment}
+                      </p>
 
+                      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-[#9CA3AF]">
+                        <span>{workout.duration} min</span>
+                        <span>{workout.caloriesBurned} kcal</span>
+                        <span>★ {workout.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:shrink-0">
+                      <Link
+                        href={`/workout/${workout.id}`}
+                        className="flex-1 rounded-lg border border-[#374151] px-4 py-2.5 text-center text-[11px] font-semibold text-[#E5E7EB] transition hover:bg-[#1A1D24] sm:flex-none"
+                      >
+                        View Details
+                      </Link>
+
+                      {activeTab === "plan" && (
                         <button
                           type="button"
-                          onClick={() => handleRemove(workout.id)}
-                          aria-label={`Remove ${workout.name}`}
-                          className="shrink-0 text-xl leading-none text-[#6B7280] transition hover:text-white"
+                          onClick={() => handleDone(workout.id)}
+                          className="flex-1 rounded-lg bg-[#CCFF00] px-4 py-2.5 text-[11px] font-semibold text-[#0F1115] transition hover:bg-[#C2F800] sm:flex-none"
                         >
-                          ×
+                          {isDone ? "Done" : "Mark as Done"}
                         </button>
-                      </div>
+                      )}
 
-                      <div className="mt-5 grid grid-cols-3 gap-3">
-                        <SmallStat
-                          label="Duration"
-                          value={`${workout.duration} min`}
-                        />
-
-                        <SmallStat
-                          label="Calories"
-                          value={`${workout.caloriesBurned} kcal`}
-                        />
-
-                        <SmallStat
-                          label="Rating"
-                          value={`★ ${workout.rating}`}
-                        />
-                      </div>
-
-                      <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                        <Link
-                          href={`/workout/${workout.id}`}
-                          className="inline-flex h-9 items-center justify-center rounded-lg border border-[#374151] px-4 text-[11px] font-semibold text-[#E5E7EB] transition hover:bg-[#1A1D24]"
-                        >
-                          View Details
-                        </Link>
-
-                        {activeTab === "plan" && (
-                          <button
-                            type="button"
-                            onClick={() => handleDone(workout.id)}
-                            className={`inline-flex h-9 items-center justify-center rounded-lg px-4 text-[11px] font-bold transition ${
-                              isDone
-                                ? "bg-[#252A31] text-[#9CA3AF]"
-                                : "bg-[#C2F800] text-[#0C0D10] hover:bg-[#CCFF00]"
-                            }`}
-                          >
-                            {isDone ? "Done" : "Mark as Done"}
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(workout.id)}
+                        aria-label={`Remove ${workout.name}`}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#374151] text-[18px] leading-none text-[#9CA3AF] transition hover:border-[#CCFF00] hover:text-white"
+                      >
+                        ×
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -316,37 +342,23 @@ export default function MyPlan() {
 function Metric({
   label,
   value,
+  highlight = false,
 }: {
   label: string;
   value: string;
+  highlight?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[#222630] bg-[#15171D] px-4 py-3">
-      <p className="text-[10px] uppercase text-[#6B7280]">
+    <div className="px-4 py-4 sm:px-6 sm:py-5">
+      <p className="text-[9px] text-[#6B7280] sm:text-[10px]">
         {label}
       </p>
 
-      <p className="mt-1 font-['Oswald'] text-[22px] font-bold">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function SmallStat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="min-w-0">
-      <p className="truncate text-[10px] uppercase text-[#6B7280]">
-        {label}
-      </p>
-
-      <p className="mt-1 truncate text-[11px] text-[#E5E7EB]">
+      <p
+        className={`mt-1 font-['Oswald'] text-[20px] font-bold sm:text-[22px] ${
+          highlight ? "text-[#C2F800]" : "text-white"
+        }`}
+      >
         {value}
       </p>
     </div>

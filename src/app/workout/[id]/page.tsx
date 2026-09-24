@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { addToPlan, getPlan, saveForLater, type Workout } from "@/lib/fitlog";
+import Image from "next/image";
 
 export default function WorkoutDetails({
   params,
@@ -134,7 +135,7 @@ export default function WorkoutDetails({
       <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
         <div className="grid gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="h-[360px] overflow-hidden rounded-2xl border border-[#232834] bg-[#171A21] sm:h-[500px] md:h-[600px] lg:h-[735px]">
-            <img
+            <Image
               src={workout.image}
               alt={workout.name}
               className="h-full w-full object-cover"

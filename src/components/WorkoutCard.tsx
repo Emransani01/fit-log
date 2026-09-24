@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { Workout } from "@/lib/fitlog";
+import Image from "next/image";
 
 export default function WorkoutCard({ workout }: { workout: Workout }) {
   return (
@@ -9,7 +10,7 @@ export default function WorkoutCard({ workout }: { workout: Workout }) {
       className="group overflow-hidden rounded-2xl border border-[#222630] bg-[#15171D] transition hover:border-[#374151]"
     >
       <div className="relative h-[190px] overflow-hidden bg-[#171A21] sm:h-[192px]">
-        <img
+        <Image
           src={workout.image}
           alt={workout.name}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"

@@ -66,7 +66,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/my-plan"
+              href="/my-plan?tab=plan"
               className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition sm:px-4 sm:text-[12px] ${
                 myPlanActive
                   ? "bg-[#1A2312] text-[#C2F800]"
@@ -79,7 +79,7 @@ export default function Navbar() {
 
           <div className="flex shrink-0 items-center gap-3 sm:gap-5">
             <Link
-              href="/my-plan"
+              href="/my-plan?tab=plan"
               className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5E7EB] sm:gap-2 sm:text-[12px]"
             >
               <span>Plan</span>
@@ -90,7 +90,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/my-plan"
+              href="/my-plan?tab=saved"
               className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5E7EB] sm:gap-2 sm:text-[12px]"
             >
               <span>Saved</span>
