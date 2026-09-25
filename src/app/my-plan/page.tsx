@@ -26,9 +26,7 @@ export default function MyPlan() {
           <Navbar />
 
           <section className="flex flex-1 items-center justify-center px-6">
-            <p className="text-[13px] text-[#9CA3AF]">
-              Loading workouts…
-            </p>
+            <p className="text-[13px] text-[#9CA3AF]">Loading workouts…</p>
           </section>
 
           <Footer />
@@ -51,8 +49,7 @@ function MyPlanContent() {
   const [sortBy, setSortBy] = useState<SortOption>("duration");
   const [toast, setToast] = useState("");
 
-  const activeTab: Tab =
-    searchParams.get("tab") === "saved" ? "saved" : "plan";
+  const activeTab: Tab = searchParams.get("tab") === "saved" ? "saved" : "plan";
 
   useEffect(() => {
     const loadStorage = () => {
@@ -145,10 +142,6 @@ function MyPlanContent() {
 
       <section className="mx-auto w-full max-w-[1232px] flex-1 px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12">
         <div>
-          <p className="text-[10px] font-bold tracking-[1.1px] text-[#C2F800] sm:text-[11px]">
-            YOUR WORKOUTS
-          </p>
-
           <h1 className="mt-2 font-['Oswald'] text-[36px] font-bold leading-none tracking-[-0.8px] sm:text-[44px]">
             MY PLAN
           </h1>
@@ -160,21 +153,11 @@ function MyPlanContent() {
         </div>
 
         <div className="mt-6 grid grid-cols-3 divide-x divide-[#252A33] overflow-hidden rounded-lg border border-[#252A33] bg-[#14171E]">
-          <Metric
-            label="Exercises"
-            value={String(plan.length)}
-            highlight
-          />
+          <Metric label="Exercises" value={String(plan.length)} highlight />
 
-          <Metric
-            label="Minutes"
-            value={String(totalMinutes)}
-          />
+          <Metric label="Minutes" value={String(totalMinutes)} />
 
-          <Metric
-            label="Calories"
-            value={String(totalCalories)}
-          />
+          <Metric label="Calories" value={String(totalCalories)} />
         </div>
 
         <div className="mt-9 flex flex-col gap-4 border-b border-[#222630] sm:flex-row sm:items-center sm:justify-between">
@@ -205,19 +188,14 @@ function MyPlanContent() {
           </div>
 
           <div className="mb-3 flex items-center gap-2 sm:mb-2">
-            <label
-              htmlFor="sort"
-              className="text-[11px] text-[#6B7280]"
-            >
+            <label htmlFor="sort" className="text-[11px] text-[#6B7280]">
               Sort By
             </label>
 
             <select
               id="sort"
               value={sortBy}
-              onChange={(event) =>
-                setSortBy(event.target.value as SortOption)
-              }
+              onChange={(event) => setSortBy(event.target.value as SortOption)}
               className="rounded-lg border border-[#2A2F39] bg-[#15171D] px-3 py-2 text-[11px] text-[#E5E7EB] outline-none"
             >
               <option value="duration">Duration</option>
@@ -229,9 +207,7 @@ function MyPlanContent() {
 
         {loading ? (
           <div className="mt-8 rounded-2xl border border-[#222630] bg-[#15171D] px-6 py-16 text-center">
-            <p className="text-[13px] text-[#9CA3AF]">
-              Loading workouts…
-            </p>
+            <p className="text-[13px] text-[#9CA3AF]">Loading workouts…</p>
           </div>
         ) : sortedWorkouts.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#222630] bg-[#15171D] px-6 py-16 text-center">
@@ -251,7 +227,7 @@ function MyPlanContent() {
               href="/"
               className="mt-6 inline-flex h-10 items-center rounded-md bg-[#C2F800] px-6 text-[12px] font-bold text-[#0C0D10] transition hover:bg-[#CCFF00]"
             >
-              BROWSE WORKOUTS
+              Go to workouts
             </Link>
           </div>
         ) : (
@@ -350,9 +326,7 @@ function Metric({
 }) {
   return (
     <div className="px-4 py-4 sm:px-6 sm:py-5">
-      <p className="text-[9px] text-[#6B7280] sm:text-[10px]">
-        {label}
-      </p>
+      <p className="text-[9px] text-[#6B7280] sm:text-[10px]">{label}</p>
 
       <p
         className={`mt-1 font-['Oswald'] text-[20px] font-bold sm:text-[22px] ${

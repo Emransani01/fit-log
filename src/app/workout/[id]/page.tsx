@@ -1,12 +1,21 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { addToPlan, getPlan, saveForLater, type Workout } from "@/lib/fitlog";
-import Image from "next/image";
+import {
+  addToPlan,
+  getPlan,
+  getSaved,
+  removeFromSaved,
+  saveForLater,
+  type Workout,
+} from "@/lib/fitlog";
+
+const API_URL = "https://api.abcz.workers.dev/api/fitlog";
 
 export default function WorkoutDetails({
   params,
@@ -17,15 +26,14 @@ export default function WorkoutDetails({
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState("");
   const [planCount, setPlanCount] = useState(0);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const loadWorkout = async () => {
       try {
         const { id } = await params;
 
-        const response = await fetch(
-          `https://api.abcz.workers.dev/api/fitlog/${id}`,
-        );
+        const response = await fetch(`${API_URL}/${id}`);
 
         if (!response.ok) {
           throw new Error("Workout not found");
@@ -34,6 +42,12 @@ export default function WorkoutDetails({
         const data: Workout = await response.json();
 
         setWorkout(data);
+
+        const currentPlan = getPlan();
+        const currentSaved = getSaved();
+
+        setPlanCount(currentPlan.length);
+        setSaved(currentSaved.some((item) => item.id === data.id));
       } catch {
         setWorkout(null);
       } finally {
@@ -43,22 +57,6 @@ export default function WorkoutDetails({
 
     loadWorkout();
   }, [params]);
-
-  useEffect(() => {
-    const updatePlanCount = () => {
-      setPlanCount(getPlan().length);
-    };
-
-    updatePlanCount();
-
-    window.addEventListener("fitlog-storage-update", updatePlanCount);
-    window.addEventListener("storage", updatePlanCount);
-
-    return () => {
-      window.removeEventListener("fitlog-storage-update", updatePlanCount);
-      window.removeEventListener("storage", updatePlanCount);
-    };
-  }, []);
 
   useEffect(() => {
     if (!toast) {
@@ -77,10 +75,24 @@ export default function WorkoutDetails({
       return;
     }
 
-    const result = addToPlan(workout);
+    const currentPlan = getPlan();
 
-    setToast(result.message);
-    setPlanCount(getPlan().length);
+    if (currentPlan.length >= 5) {
+      setToast("Today’s plan can contain up to 5 workouts.");
+      return;
+    }
+
+    if (currentPlan.some((item) => item.id === workout.id)) {
+      setToast("Workout is already in today’s plan.");
+      return;
+    }
+
+    addToPlan(workout);
+
+    const updatedPlan = getPlan();
+
+    setPlanCount(updatedPlan.length);
+    setToast("Workout added to today’s plan.");
   };
 
   const handleSave = () => {
@@ -88,37 +100,55 @@ export default function WorkoutDetails({
       return;
     }
 
-    const result = saveForLater(workout);
+    const currentSaved = getSaved();
+    const alreadySaved = currentSaved.some((item) => item.id === workout.id);
 
-    setToast(result.message);
+    if (alreadySaved) {
+      removeFromSaved(workout.id);
+      setSaved(false);
+      setToast("Workout removed from saved.");
+      return;
+    }
+
+    saveForLater(workout);
+    setSaved(true);
+    setToast("Workout saved for later.");
   };
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0F1115] text-white">
-        <p className="text-sm text-[#9CA3AF]">Loading workouts…</p>
+      <main className="min-h-screen bg-[#0C0D10] text-white">
+        <Navbar />
+
+        <div className="mx-auto max-w-[1232px] px-4 py-20 text-center sm:px-6">
+          <p className="text-sm text-[#9CA3AF]">Loading workout…</p>
+        </div>
+
+        <Footer />
       </main>
     );
   }
 
   if (!workout) {
     return (
-      <main className="flex min-h-screen flex-col bg-[#0F1115] text-white">
+      <main className="min-h-screen bg-[#0C0D10] text-white">
         <Navbar />
 
-        <section className="flex flex-1 items-center justify-center px-6">
-          <div className="text-center">
-            <h1 className="font-['Oswald'] text-3xl font-bold">
-              WORKOUT NOT FOUND
-            </h1>
+        <section className="mx-auto max-w-[1232px] px-4 py-20 text-center sm:px-6">
+          <p className="text-[11px] font-bold uppercase tracking-[1px] text-[#C2F800]">
+            WORKOUT NOT FOUND
+          </p>
 
-            <Link
-              href="/"
-              className="mt-6 inline-flex rounded-xl bg-[#CCFF00] px-6 py-3 text-sm font-semibold text-[#0F1115]"
-            >
-              Back to workouts
-            </Link>
-          </div>
+          <h1 className="mt-3 font-['Oswald'] text-[36px] font-bold">
+            THIS WORKOUT DOESN&apos;T EXIST
+          </h1>
+
+          <Link
+            href="/"
+            className="mt-6 inline-flex h-10 items-center rounded-lg bg-[#C2F800] px-6 text-[12px] font-bold text-[#0C0D10] transition hover:bg-[#CCFF00]"
+          >
+            BACK TO WORKOUTS
+          </Link>
         </section>
 
         <Footer />
@@ -126,144 +156,148 @@ export default function WorkoutDetails({
     );
   }
 
-  const isPlanFull = planCount >= 5;
-
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#0F1115] text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#0C0D10] text-white">
       <Navbar />
 
-      <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
-        <div className="grid gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="h-[360px] overflow-hidden rounded-2xl border border-[#232834] bg-[#171A21] sm:h-[500px] md:h-[600px] lg:h-[735px]">
+      <section className="mx-auto max-w-[1232px] px-4 pb-16 pt-8 sm:px-6 sm:pb-20 sm:pt-12">
+        <Link
+          href="/"
+          className="inline-flex items-center text-[11px] font-semibold text-[#9CA3AF] transition hover:text-white"
+        >
+          ← BACK TO WORKOUTS
+        </Link>
+
+        <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
+          {/* Workout Image */}
+          <div className="relative h-[360px] overflow-hidden rounded-2xl border border-[#232834] bg-[#171A21] sm:h-[500px] md:h-[600px] lg:h-[735px]">
             <Image
               src={workout.image}
               alt={workout.name}
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 1023px) 100vw, 50vw"
+              className="object-cover"
+              priority
             />
           </div>
 
-          <div>
-            <div className="mb-4 flex flex-wrap gap-2 sm:mb-5">
+          {/* Workout Information */}
+          <div className="lg:pt-2">
+            {/* Muscle Groups */}
+            <div className="flex flex-wrap gap-2">
               {workout.muscleGroups.map((muscle) => (
                 <span
                   key={muscle}
-                  className="rounded-full bg-[#CCFF00] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#0F1115] sm:px-3.5 sm:text-[11px]"
+                  className="rounded-full bg-[#C2F800] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#0C0D10]"
                 >
                   {muscle}
                 </span>
               ))}
             </div>
 
-            <h1 className="font-['Oswald'] text-[30px] font-bold leading-9 tracking-[-0.7px] sm:text-[36px] sm:leading-10 sm:tracking-[-0.9px]">
+            {/* Title */}
+            <h1 className="mt-5 font-['Oswald'] text-[38px] font-bold leading-[0.98] tracking-[-0.5px] sm:text-[48px]">
               {workout.name.toUpperCase()}
             </h1>
 
-            <p className="mt-4 text-[14px] leading-6 text-[#9CA3AF] sm:mt-5 sm:text-[16px]">
+            {/* Description */}
+            <p className="mt-5 text-[14px] leading-6 text-[#9CA3AF]">
               {workout.description}
             </p>
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-[#232834] bg-[#151922] sm:mt-8">
-              <SpecRow label="EQUIPMENT" value={workout.equipment} />
-              <SpecRow label="DIFFICULTY" value={workout.difficulty} />
-              <SpecRow label="SETS" value={String(workout.sets)} />
-              <SpecRow label="REPS" value={workout.reps} />
-              <SpecRow label="DURATION" value={`${workout.duration} min`} />
-              <SpecRow
-                label="CALORIES"
-                value={`${workout.caloriesBurned} kcal`}
-              />
-              <SpecRow label="RATING" value={`★ ${workout.rating}`} last />
-            </div>
+            {/* Workout Specs - Table/List Layout */}
+            <div className="mt-7 overflow-hidden rounded-xl border border-[#222630] bg-[#15171D]">
+              <div className="divide-y divide-[#222630]">
+                <DetailRow label="Equipment" value={workout.equipment} />
 
-            <div className="mt-7 sm:mt-8">
-              <h2 className="text-[15px] font-extrabold uppercase tracking-[0.8px] sm:text-[16px]">
-                INSTRUCTIONS
-              </h2>
+                <DetailRow label="Difficulty" value={workout.difficulty} />
 
-              <div className="mt-4 space-y-4">
-                {workout.instructions.slice(0, 4).map((instruction, index) => (
-                  <div key={index} className="flex gap-3 sm:gap-4">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#CCFF00] text-[11px] font-bold text-[#0F1115]">
-                      {index + 1}
-                    </span>
+                <DetailRow label="Sets" value={String(workout.sets)} />
 
-                    <p className="text-[13px] leading-[22px] text-[#D1D5DB] sm:text-[14px] sm:leading-[22.75px]">
-                      {instruction}
-                    </p>
-                  </div>
-                ))}
+                <DetailRow label="Reps" value={workout.reps} />
+
+                <DetailRow label="Duration" value={`${workout.duration} min`} />
+
+                <DetailRow
+                  label="Calories"
+                  value={`${workout.caloriesBurned} kcal`}
+                />
+
+                <DetailRow label="Rating" value={`★ ${workout.rating}`} />
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap">
+            {/* Instructions */}
+            <div className="mt-8">
+              <p className="text-[11px] font-bold uppercase tracking-[1px] text-[#C2F800]">
+                HOW TO DO IT
+              </p>
+
+              <ol className="mt-4 space-y-4">
+                {workout.instructions.slice(0, 4).map((instruction, index) => (
+                  <li key={`${instruction}-${index}`} className="flex gap-4">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#374151] text-[11px] font-bold text-[#C2F800]">
+                      {index + 1}
+                    </span>
+
+                    <p className="pt-1 text-[13px] leading-5 text-[#D1D5DB]">
+                      {instruction}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
                 onClick={handleAddToPlan}
-                disabled={isPlanFull}
-                className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-[14px] font-semibold transition sm:w-auto ${
-                  isPlanFull
-                    ? "cursor-not-allowed bg-[#3A3E46] text-[#777D88]"
-                    : "bg-[#CCFF00] text-[#0F1115] hover:bg-[#C2F800]"
-                }`}
+                disabled={planCount >= 5}
+                className="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-[#C2F800] px-5 text-[12px] font-bold text-[#0C0D10] transition hover:bg-[#CCFF00] disabled:cursor-not-allowed disabled:bg-[#252A31] disabled:text-[#6B7280]"
               >
-                <span aria-hidden="true">＋</span>
-
-                {isPlanFull ? "Today's plan is full" : "Add to today's plan"}
+                {planCount >= 5 ? "PLAN FULL" : "Add to today’s plan"}
               </button>
 
               <button
                 type="button"
                 onClick={handleSave}
-                className="inline-flex h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-[#374151] px-6 text-[14px] font-medium text-[#E5E7EB] transition hover:bg-[#171A21] sm:w-auto"
+                className={`inline-flex h-11 flex-1 items-center justify-center rounded-lg border px-5 text-[12px] font-bold transition ${
+                  saved
+                    ? "border-[#C2F800] bg-[#1A2312] text-[#C2F800]"
+                    : "border-[#374151] bg-transparent text-[#E5E7EB] hover:bg-[#1A1D24]"
+                }`}
               >
-                <span aria-hidden="true">♡</span>
-                Save for later
+                {saved ? "SAVED" : "Save for later"}
               </button>
             </div>
-
-            {isPlanFull && (
-              <p className="mt-3 text-[12px] leading-5 text-[#8A92A0]">
-                Your plan already has five workouts. Remove one from My Plan to
-                add another.
-              </p>
-            )}
           </div>
         </div>
       </section>
 
+      {/* Toast */}
       {toast && (
         <div className="fixed bottom-5 left-4 right-4 z-50 rounded-xl border border-[#374151] bg-[#15171D] px-5 py-3 text-center text-sm text-white shadow-xl sm:left-1/2 sm:right-auto sm:-translate-x-1/2">
           {toast}
         </div>
       )}
 
+      {/* Footer */}
       <Footer />
     </main>
   );
 }
 
-function SpecRow({
-  label,
-  value,
-  last = false,
-}: {
-  label: string;
-  value: string;
-  last?: boolean;
-}) {
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className={`flex items-center justify-between gap-4 px-4 py-3.5 sm:px-6 ${
-        last ? "" : "border-b border-[#1E2330]"
-      }`}
-    >
-      <span className="text-[11px] font-bold leading-4 text-[#9CA3AF] sm:text-[12px]">
+    <div className="flex min-h-[48px] items-center justify-between gap-6 px-4 py-3 sm:px-5">
+      <p className="text-[10px] font-medium uppercase tracking-[0.5px] text-[#6B7280] sm:text-[11px]">
         {label}
-      </span>
+      </p>
 
-      <span className="text-right text-[13px] font-medium leading-5 text-[#E5E7EB] sm:text-[14px]">
+      <p className="text-right text-[12px] font-medium text-[#E5E7EB] sm:text-[13px]">
         {value}
-      </span>
+      </p>
     </div>
   );
 }

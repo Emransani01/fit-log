@@ -104,16 +104,92 @@ The My Plan page supports sorting workouts by:
 
 ### All Workouts
 
-https://api.abcz.workers.dev/api/fitlog
+`https://api.abcz.workers.dev/api/fitlog`
 
 Returns the complete list of available workouts.
 
 ### Single Workout
 
-https://api.abcz.workers.dev/api/fitlog/:id
+`https://api.abcz.workers.dev/api/fitlog/:id`
 
 Returns details for a specific workout by ID.
 
 ## Getting Started
 
-Follow the steps below to run the project locally.
+### Prerequisites
+
+Make sure you have Node.js and npm installed on your computer.
+
+### Installation
+
+Clone the repository and open the project folder:
+
+```bash
+git clone <your-repository-url>
+cd fit-log
+```
+
+Install the project dependencies:
+
+```bash
+npm install
+```
+
+### Run the Development Server
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+### Run Lint
+
+```bash
+npm run lint
+```
+
+### Create a Production Build
+
+```bash
+npm run build
+```
+
+### Start the Production Server
+
+```bash
+npm start
+```
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── my-plan/
+│   ├── workout/
+│   ├── not-found.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── Footer.tsx
+│   ├── Hero.tsx
+│   ├── Navbar.tsx
+│   └── WorkoutCard.tsx
+└── lib/
+    └── fitlog.ts
+```
+
+## Notes
+
+- Workout data is loaded from the FitLog REST API.
+- Today's Plan and Saved Workouts use browser LocalStorage.
+- Today's Plan supports a maximum of five workouts.
+- The application is designed to work across desktop, tablet, and mobile screen sizes.

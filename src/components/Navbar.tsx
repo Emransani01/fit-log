@@ -39,6 +39,7 @@ export default function Navbar() {
     <>
       <header className="fixed left-0 right-0 top-0 z-[100] border-b border-[#222630] bg-[#0C0D10]">
         <div className="mx-auto flex min-h-[72px] max-w-[1280px] items-center gap-3 px-4 sm:gap-4 sm:px-6 lg:h-[81px]">
+          {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
             <Image
               src={logo}
@@ -53,6 +54,7 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Main Navigation */}
           <nav className="mx-auto flex items-center gap-1 sm:gap-2">
             <Link
               href="/"
@@ -66,7 +68,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/my-plan?tab=plan"
+              href="/my-plan"
               className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition sm:px-4 sm:text-[12px] ${
                 myPlanActive
                   ? "bg-[#1A2312] text-[#C2F800]"
@@ -77,24 +79,27 @@ export default function Navbar() {
             </Link>
           </nav>
 
+          {/* Right Counters */}
           <div className="flex shrink-0 items-center gap-3 sm:gap-5">
             <Link
-              href="/my-plan?tab=plan"
+              href="/my-plan"
               className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5E7EB] sm:gap-2 sm:text-[12px]"
             >
               <span>Plan</span>
 
+              {/* Only count is lime */}
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#C2F800] text-[11px] font-bold text-[#0C0D10]">
                 {planCount}
               </span>
             </Link>
 
             <Link
-              href="/my-plan?tab=saved"
+              href="/my-plan"
               className="flex items-center gap-1.5 text-[11px] font-semibold text-[#E5E7EB] sm:gap-2 sm:text-[12px]"
             >
               <span>Saved</span>
 
+              {/* Only count has border */}
               <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#2D313B] text-[11px] font-medium text-[#E5E7EB]">
                 {savedCount}
               </span>
