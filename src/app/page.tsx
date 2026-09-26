@@ -17,7 +17,7 @@ export default function Home() {
     const loadWorkouts = async () => {
       try {
         const response = await fetch(
-          "https://api.abcz.workers.dev/api/fitlog"
+          "https://api.api-store.workers.dev/api/fitlog",
         );
 
         if (!response.ok) {
@@ -60,9 +60,7 @@ export default function Home() {
 
           {loading && (
             <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-[#222630] bg-[#15171D]">
-              <p className="text-[14px] text-[#9CA3AF]">
-                Loading workouts…
-              </p>
+              <p className="text-[14px] text-[#9CA3AF]">Loading workouts…</p>
             </div>
           )}
 
@@ -77,10 +75,7 @@ export default function Home() {
           {!loading && !error && (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {workouts.map((workout) => (
-                <WorkoutCard
-                  key={workout.id}
-                  workout={workout}
-                />
+                <WorkoutCard key={workout.id} workout={workout} />
               ))}
             </div>
           )}
