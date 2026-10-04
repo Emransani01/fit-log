@@ -1,18 +1,24 @@
-# FitLog — Workout Library
+# 🏋️ FitLog — Workout Library
 
-## Project Name
-
-FitLog — Workout Library
-
-## Description
-
-FitLog is a responsive workout library and daily workout planning web application.
+FitLog is a responsive workout library and daily workout planning web application built with Next.js, React, TypeScript, and Tailwind CSS.
 
 Users can browse workouts from a REST API, view detailed workout information, add exercises to today's plan, save workouts for later, and manage selected workouts from the My Plan page.
 
 The project follows a dark, gym-focused interface with a lime accent color and responsive layouts for desktop, tablet, and mobile devices.
 
-## Technologies
+---
+
+## 📸 Screenshot
+
+![FitLog Workout Library](./Capture.PNG)
+
+---
+
+## 🛠️ Technologies
+
+<p align="left">
+  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,git,github" />
+</p>
 
 - Next.js
 - React
@@ -23,7 +29,9 @@ The project follows a dark, gym-focused interface with a lime accent color and r
 - Browser LocalStorage
 - Git & GitHub
 
-## Features
+---
+
+## ✨ Features
 
 ### 1. Workout Library
 
@@ -100,96 +108,22 @@ The My Plan page supports sorting workouts by:
 - Users receive feedback when removing workouts.
 - Users receive feedback when marking workouts as done.
 
-## API Documentation
+---
 
-### All Workouts
+## 📦 Dependencies
 
-`https://api.abcz.workers.dev/api/fitlog`
+The project dependencies are managed through `package.json`.
 
-Returns the complete list of available workouts.
+Main dependencies and development tools include:
 
-### Single Workout
+- Next.js
+- React
+- React DOM
+- TypeScript
+- Tailwind CSS
+- ESLint
 
-`https://api.abcz.workers.dev/api/fitlog/:id`
-
-Returns details for a specific workout by ID.
-
-## Getting Started
-
-### Prerequisites
-
-Make sure you have Node.js and npm installed on your computer.
-
-### Installation
-
-Clone the repository and open the project folder:
-
-```bash
-git clone <your-repository-url>
-cd fit-log
-```
-
-Install the project dependencies:
+Install all dependencies with:
 
 ```bash
 npm install
-```
-
-### Run the Development Server
-
-Start the local development server:
-
-```bash
-npm run dev
-```
-
-Then open:
-
-```text
-http://localhost:3000
-```
-
-### Run Lint
-
-```bash
-npm run lint
-```
-
-### Create a Production Build
-
-```bash
-npm run build
-```
-
-### Start the Production Server
-
-```bash
-npm start
-```
-
-## Project Structure
-
-```text
-src/
-├── app/
-│   ├── my-plan/
-│   ├── workout/
-│   ├── not-found.tsx
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── Footer.tsx
-│   ├── Hero.tsx
-│   ├── Navbar.tsx
-│   └── WorkoutCard.tsx
-└── lib/
-    └── fitlog.ts
-```
-
-## Notes
-
-- Workout data is loaded from the FitLog REST API.
-- Today's Plan and Saved Workouts use browser LocalStorage.
-- Today's Plan supports a maximum of five workouts.
-- The application is designed to work across desktop, tablet, and mobile screen sizes.
